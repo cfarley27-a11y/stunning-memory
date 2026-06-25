@@ -47,7 +47,7 @@ There's a manual "Add Application" form (company, role, job posting URL, applied
 
 **On automatic status checking:** most company application portals (Greenhouse, Lever, Workday, etc.) don't expose a public API for candidates to poll status, and scraping a logged-in candidate portal reliably — without breaking on layout changes or violating a site's terms — isn't a sound approach. So this tool intentionally keeps status manual: you move the card yourself when you hear back, and the saved URL is there for a one-click check. If a specific platform you use *does* have a documented public API (e.g. you're polling your own Greenhouse job board), that could be added as a per-platform integration later.
 
-## Deploying a public demo (e.g. for a portfolio)
+## Deploying (Render)
 
 This repo includes a `render.yaml` for deploying to [Render](https://render.com) as a single web service (one URL serves both the API and the built UI):
 
@@ -55,9 +55,27 @@ This repo includes a `render.yaml` for deploying to [Render](https://render.com)
 2. On Render: **New** → **Blueprint** → connect the repo. Render reads `render.yaml` automatically.
 3. Deploy. Render builds the client and starts the Express server, which also serves the built frontend.
 
-The `render.yaml` sets `DEMO_MODE=true`, which makes the server **reseed itself with fake sample applications on every boot** instead of using real data — safe to share publicly. It also enables a **"Reset Demo Data"** button in the UI so anyone using the live demo can put it back to a clean state.
+`render.yaml` ships with `DEMO_MODE=false` — a fresh deploy uses real persisted storage, not fake sample data.
 
-Don't set `DEMO_MODE=true` for a deployment with your real data — it wipes whatever's stored every time the service restarts.
+### Storage: why you need `DATABASE_URL`
+
+Render's free web service plan has an **ephemeral filesystem** — anything written to disk (including the `server/data/applications.json` file used in local dev) is wiped on every redeploy and likely on every restart. That's fine for a throwaway demo; it's not fine for real data you want to keep.
+
+To persist real data, this app talks to Postgres whenever a `DATABASE_URL` env var is set (falls back to the local JSON file when it isn't, which is what local dev uses). A free Postgres instance is enough for personal-scale use:
+
+1. Create a free Postgres database — [Neon](https://neon.tech) or [Supabase](https://supabase.com) both have a free tier. Copy the connection string they give you (it looks like `postgresql://user:pass@host/dbname?sslmode=require`).
+2. On your Render service: **Environment** tab → add `DATABASE_URL` with that connection string. (It's deliberately left out of `render.yaml` so the secret never lands in git.)
+3. Redeploy (or just restart the service) so it picks up the new env var. The server creates its own table on first boot — no manual schema setup needed.
+
+From then on, your data survives redeploys, restarts, and the free tier spinning down from inactivity.
+
+### Privacy note
+
+This app ships with **no login**. If you're using it for your own real job search on a public Render URL, anyone who has that URL can view and edit your data. Don't share the link, and don't link to it from anything public (portfolio site, resume, etc.) unless you've added an auth layer in front of it.
+
+### Demo mode (optional, for a public portfolio link)
+
+Setting `DEMO_MODE=true` makes the server **reseed itself with fake sample applications on every boot**, and enables a "Reset Demo Data" button in the UI — safe to share publicly, since nothing typed in persists or matters. Use this only on a *separate* deployment meant to showcase the project, not on the one holding your real data — demo mode wipes whatever's stored on every restart.
 
 Render's free tier spins the service down after inactivity; the first request after a while takes ~30s to wake it back up.
 
