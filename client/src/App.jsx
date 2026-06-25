@@ -57,6 +57,7 @@ function App() {
         const updated = await api.update(selected.id, form);
         setApplications((apps) => apps.map((a) => (a.id === selected.id ? updated : a)));
         setSelected(updated);
+        setShowModal(false);
       } else {
         const created = await api.create(form);
         setApplications((apps) => [...apps, created]);

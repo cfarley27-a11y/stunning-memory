@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { STAGES } from '../stages.js';
 
 const emptyForm = {
@@ -29,6 +29,23 @@ export default function ApplicationModal({ application, onClose, onSave, onDelet
       : emptyForm
   );
   const [interviewForm, setInterviewForm] = useState(emptyInterview);
+
+  // Re-sync the form when the underlying application changes server-side
+  // (e.g. adding an interview auto-advances the stage) so a later Save
+  // doesn't send back stale values and stomp that change.
+  useEffect(() => {
+    if (application) {
+      setForm({
+        company: application.company,
+        role: application.role,
+        jobUrl: application.jobUrl,
+        appliedDate: application.appliedDate,
+        notes: application.notes,
+        stage: application.stage,
+        decisionNotes: application.decisionNotes,
+      });
+    }
+  }, [application?.updatedAt]);
 
   const update = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
