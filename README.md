@@ -4,7 +4,28 @@ A local applicant tracking system for your own job search: **Applied → Intervi
 
 - **Backend**: Express API, data persisted to a plain JSON file (`server/data/applications.json`) — no database setup required.
 - **Frontend**: React (Vite) Kanban board. Drag cards between stages, click a card to edit it, log interviews (supports multiple rounds), and add offer/rejection notes.
+- A **funnel metrics bar** (Response Rate, Interview Rate, Offer Rate, Win Rate) turns raw application records into the conversion numbers a job search actually runs on.
 - Everything runs on your machine — nothing is hosted or sent anywhere.
+
+## Why I built this
+
+Most job-search tracking happens in a spreadsheet that nobody re-opens after row 15. The problem isn't storage, it's that a spreadsheet doesn't tell you anything — it's a list, not a funnel. I wanted something that would surface the same question a product manager asks about any pipeline: **where are applications actually dying, and is that a top-of-funnel problem (not enough responses) or a bottom-of-funnel one (interviewing fine, not closing)?**
+
+**Who it's for:** an individual job seeker tracking their own applications — not a recruiting team managing candidates across many open reqs. That distinction drove most of the scope decisions below.
+
+**Success metric:** if a user can glance at the stats bar and immediately say "my response rate is fine but my interview-to-offer conversion is weak, so I should work on later-round prep, not on sending more applications" — the tool did its job. Raw card counts don't do that; conversion rates do.
+
+### Key scope decisions
+
+- **Manual status entry, not auto-scraping.** Most ATS portals (Greenhouse, Lever, Workday) don't expose a public status API to candidates, and scraping a logged-in candidate portal is brittle and often against terms of service. Rather than ship a feature that silently breaks, I scoped it out and kept a one-click link back to the posting instead. For an individual-use tool, the cost of one manual click per status change is low; the cost of a flaky scraper that gives false confidence is high.
+- **A JSON file, not a database.** At the scale of one person's job search (dozens, not millions, of records), a database adds setup friction with no real benefit. The tradeoff only flips if this became multi-user — which it isn't designed to be.
+- **Stage-derived metrics, not an event log.** The funnel numbers are computed from each application's *current* stage rather than a full history of every transition. That's simpler to build and reason about, and accurate for the questions this tool answers (rates, not velocity). If "time spent per stage" became a priority metric, that would require logging transitions with timestamps — a deliberate v2, not a v1 requirement.
+
+### What's next (if I kept building)
+
+- Track *time in stage* (e.g. median days from Applied → first response) to diagnose pace, not just conversion.
+- Segment metrics by source (referral vs. cold apply vs. recruiter outreach) to see which channel actually converts.
+- A "stale application" flag — anything sitting in Applied past some threshold with no response, since that's a different problem than a low response rate.
 
 ## Setup
 

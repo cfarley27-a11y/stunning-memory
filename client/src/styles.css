@@ -93,6 +93,44 @@ body {
   font-size: 13px;
 }
 
+.stats-bar {
+  display: flex;
+  gap: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  min-width: 110px;
+}
+
+.stat-value {
+  font-family: Georgia, serif;
+  font-size: 26px;
+  color: var(--accent);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text);
+  margin-top: 4px;
+}
+
+.stat-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
 .board {
   display: grid;
   grid-template-columns: repeat(5, minmax(220px, 1fr));

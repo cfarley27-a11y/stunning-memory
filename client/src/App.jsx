@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Board from './components/Board.jsx';
 import ApplicationModal from './components/ApplicationModal.jsx';
+import StatsBar from './components/StatsBar.jsx';
 import { api } from './api.js';
 
 function App() {
@@ -118,6 +119,8 @@ function App() {
       </div>
 
       {error && <p style={{ color: '#b8463f' }}>{error}</p>}
+
+      <StatsBar applications={applications} />
 
       <Board applications={applications} onStageChange={handleStageChange} onCardClick={openExisting} />
 
