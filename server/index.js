@@ -33,9 +33,12 @@ app.get('/api/applications', (req, res) => {
 });
 
 app.post('/api/applications', (req, res) => {
-  const { company, role, jobUrl, appliedDate, notes } = req.body;
+  const { company, role, jobUrl, appliedDate, notes, stage } = req.body;
   if (!company || !role) {
     return res.status(400).json({ error: 'company and role are required' });
+  }
+  if (stage && !STAGES.includes(stage)) {
+    return res.status(400).json({ error: `stage must be one of ${STAGES.join(', ')}` });
   }
   const applications = readAll();
   const now = new Date().toISOString();
@@ -46,7 +49,7 @@ app.post('/api/applications', (req, res) => {
     jobUrl: jobUrl || '',
     appliedDate: appliedDate || now.slice(0, 10),
     notes: notes || '',
-    stage: 'applied',
+    stage: stage || 'applied',
     interviews: [],
     decisionNotes: '',
     createdAt: now,
