@@ -11,6 +11,8 @@ async function request(url, options) {
 }
 
 export const api = {
+  meta: () => request('/api/meta'),
+  reset: () => request('/api/reset', { method: 'POST' }),
   list: () => request(BASE),
   create: (data) =>
     request(BASE, {

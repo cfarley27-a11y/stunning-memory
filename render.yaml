@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: application-tracker
+    runtime: node
+    plan: free
+    buildCommand: npm run install:all && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: DEMO_MODE
+        value: "true"
+      - key: NODE_VERSION
+        value: 22

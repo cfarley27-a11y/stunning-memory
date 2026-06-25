@@ -1,13 +1,32 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
 const { readAll, writeAll } = require('./db');
+const { buildSeedData } = require('./seed');
+
+const DEMO_MODE = process.env.DEMO_MODE === 'true';
+
+if (DEMO_MODE) {
+  writeAll(buildSeedData());
+}
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const STAGES = ['applied', 'interview_scheduled', 'interviewed', 'accepted', 'rejected'];
+
+app.get('/api/meta', (req, res) => {
+  res.json({ resetEnabled: DEMO_MODE });
+});
+
+app.post('/api/reset', (req, res) => {
+  if (!DEMO_MODE) return res.status(403).json({ error: 'reset is disabled' });
+  const seeded = buildSeedData();
+  writeAll(seeded);
+  res.json(seeded);
+});
 
 app.get('/api/applications', (req, res) => {
   res.json(readAll());
@@ -101,6 +120,12 @@ app.delete('/api/applications/:id/interviews/:interviewId', (req, res) => {
 
   writeAll(applications);
   res.json(application);
+});
+
+const clientDist = path.join(__dirname, '..', 'client', 'dist');
+app.use(express.static(clientDist));
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(clientDist, 'index.html'));
 });
 
 const PORT = process.env.PORT || 4000;

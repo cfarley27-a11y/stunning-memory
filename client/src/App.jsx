@@ -8,13 +8,27 @@ function App() {
   const [selected, setSelected] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
+  const [resetEnabled, setResetEnabled] = useState(false);
 
   useEffect(() => {
     api
       .list()
       .then(setApplications)
       .catch((e) => setError(e.message));
+    api
+      .meta()
+      .then((m) => setResetEnabled(m.resetEnabled))
+      .catch(() => {});
   }, []);
+
+  const handleReset = async () => {
+    try {
+      const seeded = await api.reset();
+      setApplications(seeded);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
 
   const openNew = () => {
     setSelected(null);
@@ -90,9 +104,16 @@ function App() {
           <h1>Application Tracker</h1>
           <p>Drag a card to move it through the pipeline, or click it to edit.</p>
         </div>
-        <button className="btn btn-primary" onClick={openNew}>
-          + Add Application
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {resetEnabled && (
+            <button className="btn btn-secondary" onClick={handleReset}>
+              Reset Demo Data
+            </button>
+          )}
+          <button className="btn btn-primary" onClick={openNew}>
+            + Add Application
+          </button>
+        </div>
       </div>
 
       {error && <p style={{ color: '#b8463f' }}>{error}</p>}
